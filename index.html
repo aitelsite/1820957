@@ -1,36 +1,84 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-    <meta charset="UTF-8" />
-    <title>قیمت لحظه‌ای طلا</title>
+<meta charset="UTF-8" />
+<title>قیمت طلا، سکه و ارز دیجیتال</title>
+<style>
+  body { font-family: Tahoma, sans-serif; direction: rtl; padding: 20px; }
+  h2 { color: #2c3e50; }
+  .price-box { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; max-width: 400px; }
+  .item { margin-bottom: 6px; }
+</style>
 </head>
 <body>
-    <h1>قیمت طلا</h1>
-    <div id="gold-price">در حال بارگذاری...</div>
 
-    <script>
-        // آدرس API وب‌سرویس الان چند برای دریافت قیمت طلا (مثال: سکه)
-        const apiURL = 'https://api.alanchand.com?type=gold&symbols=sekkeh';
-        
-        fetch(apiURL, {
-            headers: {
-                'Authorization': 'Bearer YOUR_API_TOKEN'  // جایگزین با توکن شما
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // فرض بر این است که داده به شکل آرایه است، نام و قیمت را استخراج می‌کنیم
-            if (data && data.length > 0) {
-                const goldData = data[0];
-                document.getElementById('gold-price').textContent = 'قیمت سکه: ' + goldData.price + ' تومان';
-            } else {
-                document.getElementById('gold-price').textContent = 'داده‌ای یافت نشد';
-            }
-        })
-        .catch(error => {
-            document.getElementById('gold-price').textContent = 'خطا در دریافت قیمت';
-            console.error(error);
-        });
-    </script>
+<h1>قیمت لحظه‌ای طلا، سکه و ارز دیجیتال</h1>
+
+<div class="price-box" id="gold-price">
+  <h2>قیمت طلا</h2>
+  در حال بارگذاری...
+</div>
+
+<div class="price-box" id="coin-price">
+  <h2>قیمت سکه</h2>
+  در حال بارگذاری...
+</div>
+
+<div class="price-box" id="crypto-price">
+  <h2>قیمت ارز دیجیتال</h2>
+  در حال بارگذاری...
+</div>
+
+<script>
+// دریافت قیمت طلا
+fetch('https://brsapi.ir/api/v1/gold/price')
+  .then(res => res.json())
+  .then(data => {
+    const goldDiv = document.getElementById('gold-price');
+    if (data && data.price) {
+      goldDiv.innerHTML = `<h2>قیمت طلا</h2><div class="item">قیمت گرم ۱۸ عیار: ${data.price} تومان</div>`;
+    } else {
+      goldDiv.textContent = 'داده قیمت طلا موجود نیست';
+    }
+  })
+  .catch(() => {
+    document.getElementById('gold-price').textContent = 'خطا در دریافت قیمت طلا';
+  });
+
+// دریافت قیمت سکه
+fetch('https://brsapi.ir/api/v1/coin/price')
+  .then(res => res.json())
+  .then(data => {
+    const coinDiv = document.getElementById('coin-price');
+    if (data && data.price) {
+      coinDiv.innerHTML = `<h2>قیمت سکه</h2><div class="item">قیمت سکه امامی: ${data.price} تومان</div>`;
+    } else {
+      coinDiv.textContent = 'داده قیمت سکه موجود نیست';
+    }
+  })
+  .catch(() => {
+    document.getElementById('coin-price').textContent = 'خطا در دریافت قیمت سکه';
+  });
+
+// دریافت قیمت چند ارز دیجیتال (مثال: بیت‌کوین و اتریوم)
+fetch('https://brsapi.ir/api/v1/crypto/price?symbols=BTC,ETH')
+  .then(res => res.json())
+  .then(data => {
+    const cryptoDiv = document.getElementById('crypto-price');
+    if (data && data.prices) {
+      let html = `<h2>قیمت ارز دیجیتال</h2>`;
+      data.prices.forEach(coin => {
+        html += `<div class="item">${coin.symbol}: ${coin.price} تومان</div>`;
+      });
+      cryptoDiv.innerHTML = html;
+    } else {
+      cryptoDiv.textContent = 'داده قیمت ارز دیجیتال موجود نیست';
+    }
+  })
+  .catch(() => {
+    document.getElementById('crypto-price').textContent = 'خطا در دریافت قیمت ارز دیجیتال';
+  });
+</script>
+
 </body>
 </html>
